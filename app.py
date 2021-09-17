@@ -63,17 +63,17 @@ def fetch_metar():
     stations = ["KMWO", "KHAO"]
     for name in stations:
         url = "%s/%s.TXT" % (BASE_URL, name)
-        print(f"Fetching {url}")
+        logger.debug(f"Fetching {url}")
         try:
             response = urlopen(url, timeout=30)
         except Metar.ParserError as exc:
-            print("METAR code: ", line)
-            print(string.join(exc.args, ", "), "\n")
+            logger.debug("METAR code: {0}".format(line))
+            logger.debug(string.join(exc.args, ", "), "\n")
         except:
             import traceback
 
-            print(traceback.format_exc())
-            print("Error retrieving", name, "data", "\n")
+            logger.debug(traceback.format_exc())
+            logger.debug("Error retrieving", name, "data")
         else:
             report = ""
             for line in response:
@@ -88,7 +88,7 @@ def fetch_metar():
                         (mpcalc.relative_humidity_from_dewpoint(temp, dewp)).m * 100, 2
                     )  # convert to %
                     pressure = truncate(obs.press._value * 33.864, 2)
-                    print(
+                    logger.debug(
                         f"MQTT -> station_id: {obs.station_id}, dewp: {obs.dewpt._value}, temp: {obs.temp._value}, hum: {hum}, pressure: {pressure}"
                     )
                     mqtt_publish(
@@ -96,7 +96,7 @@ def fetch_metar():
                     )
                     break
             if not report:
-                print("No data for ", name, "\n\n")
+                logger.debug("No data for ", name)
 
 
 if __name__ == "__main__":
