@@ -1,4 +1,4 @@
 metar
 numpy
-metpy
+metpy == 1.0
 paho-mqtt
