@@ -83,8 +83,15 @@ def fetch_metar():
                     report = line.strip()
                     obs = Metar.Metar(line)
                     logger.debug(obs)
-                    temp = obs.temp._value * units.degC
-                    dewp = obs.dewpt._value * units.degC
+                    try:
+                      temp = obs.temp._value * units.degC
+                    except:
+                      temp = 0
+                    
+                    try:
+                      dewp = obs.dewpt._value * units.degC
+                    except:
+                      dewp = 0
                     hum = truncate(
                         (mpcalc.relative_humidity_from_dewpoint(temp, dewp)).m * 100, 2
                     )  # convert to %
