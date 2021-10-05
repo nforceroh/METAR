@@ -82,6 +82,7 @@ def fetch_metar():
                 if line.startswith(name):
                     report = line.strip()
                     obs = Metar.Metar(line)
+                    logger.debug(obs)
                     temp = obs.temp._value * units.degC
                     dewp = obs.dewpt._value * units.degC
                     hum = truncate(
