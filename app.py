@@ -84,17 +84,23 @@ def fetch_metar():
                     obs = Metar.Metar(line)
                     logger.debug(obs)
                     try:
-                      temp = obs.temp._value * units.degC
+                        temp = obs.temp._value * units.degC
                     except:
-                      temp = 0
-                    
+                        temp = 0
+
                     try:
-                      dewp = obs.dewpt._value * units.degC
+                        dewp = obs.dewpt._value * units.degC
                     except:
-                      dewp = 0
-                    hum = truncate(
-                        (mpcalc.relative_humidity_from_dewpoint(temp, dewp)).m * 100, 2
-                    )  # convert to %
+                        dewp = temp
+                        
+                    if dewp != 0 and temp != 0:
+                        hum = truncate(
+                            (mpcalc.relative_humidity_from_dewpoint(
+                                temp, dewp)).m * 100, 2
+                        )  # convert to %
+                    else:
+                        hum = 0
+
                     pressure = truncate(obs.press._value * 33.864, 2)
                     logger.debug(
                         f"MQTT -> station_id: {obs.station_id}, dewp: {obs.dewpt._value}, temp: {obs.temp._value}, hum: {hum}, pressure: {pressure}"
