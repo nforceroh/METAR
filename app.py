@@ -103,10 +103,10 @@ def fetch_metar():
 
                     pressure = truncate(obs.press._value * 33.864, 2)
                     logger.debug(
-                        f"MQTT -> station_id: {obs.station_id}, dewp: {obs.dewpt._value}, temp: {obs.temp._value}, hum: {hum}, pressure: {pressure}"
+                        f"MQTT -> station_id: {obs.station_id}, dewp: {dewp}, temp: {temp}, hum: {hum}, pressure: {pressure}"
                     )
                     mqtt_publish(
-                        obs.station_id, obs.dewpt._value, obs.temp._value, hum, pressure
+                        obs.station_id, dewp, temp, hum, pressure
                     )
                     break
             if not report:
