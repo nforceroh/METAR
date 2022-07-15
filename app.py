@@ -22,9 +22,14 @@ except:
     from urllib.request import urlopen
 
 BASE_URL = "http://tgftp.nws.noaa.gov/data/observations/metar/stations"
-MQTT_PUB_ROOT = "METAR"
-broker_address = "mqtt.nf.lab"
-QUERYTIME = os.getenv("QUERYTIME", "900")
+MQTT_PUB_ROOT = os.getenv("MQTT_PUB_ROOT", "METAR")
+MQTT_CLIENTID = os.getenv("MQTT_CLIENTID", f'metar-{random.randint(0, 1000)}')
+MQTT_HOST = os.getenv("MQTT_HOST", "")
+MQTT_PORT = os.getenv("MQTT_PORT", "1883")
+MQTT_USER = os.getenv("MQTT_USER", "")
+MQTT_PASS = os.getenv("MQTT_PASS", "")
+MQTT_KEEPALIVE = os.getenv("MQTT_KEEPALIVE", "60")
+METAR_SNOOZE = os.getenv("METAR_SNOOZE", "300")
 
 Log_Format = "%(levelname)s %(asctime)s - %(message)s"
 logging.basicConfig(
@@ -45,18 +50,20 @@ def truncate(f, n):
 
 
 def mqtt_publish(station, dewpoint, temperature, rh, pressure):
-    dict = {
+    data = {
         "station": station,
         "dewpoint": dewpoint,
         "temp": temperature,
         "humidity": rh,
         "pressure": pressure,
     }
-    logger.debug("Write points: {0}".format(dict))
 
-    client = mqtt.Client("metar")  # create new instance
-    client.connect(broker_address)  # connect to broker
-    client.publish(MQTT_PUB_ROOT, payload=json.dumps(dict))  # publish
+    logger.debug("Write points: {0}".format(data))
+
+    client = mqtt.Client(client_id=MQTT_CLIENTID, clean_session=None, userdata=None,
+                         transport="tcp", reconnect_on_failure=True)  # create new instance
+    client.connect(host=MQTT_HOST, port=int(MQTT_PORT))  # connect to broker
+    client.publish(MQTT_PUB_ROOT, payload=json.dumps(data))  # publish
 
 
 def fetch_metar():
@@ -93,11 +100,12 @@ def fetch_metar():
                         dewp = obs.dewpt.value("C")
                     except:
                         dewp = temp
-                        
+
                     if dewp != 0 and temp != 0:
-                        relhumcalc = str(mpcalc.relative_humidity_from_dewpoint(temp * units.celsius ,dewp * units.celsius) * units.percent * 100)
+                        relhumcalc = str(mpcalc.relative_humidity_from_dewpoint(
+                            temp * units.celsius, dewp * units.celsius) * units.percent * 100)
                         rawrelhum = relhumcalc.split(" ")
-                        hum = str(round(float(rawrelhum[0]),2))
+                        hum = str(round(float(rawrelhum[0]), 2))
                     else:
                         hum = 0
 
