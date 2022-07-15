@@ -11,6 +11,7 @@ import math
 import json
 import logging
 import time
+import random
 import numpy as np
 from metpy.units import units
 import metpy.calc as mpcalc
@@ -125,4 +126,4 @@ if __name__ == "__main__":
     while True:
         fetch_metar()
         logger.debug("Sleeping till next go around")
-        time.sleep(int(QUERYTIME))
+        time.sleep(int(METAR_SNOOZE))
